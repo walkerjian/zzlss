@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# Script Name: zzlss
+# Description: This script lists hidden and visible files, directories, and symlinks
+#              with options to suppress section headings and separators.
+#
+# Usage: ./zzlss [--no-headings] [--no-seps]
+#
+# Options:
+#   --no-headings     Suppresses the section headings (e.g., 'Hidden Files').
+#   --no-seps         Suppresses the blank lines (separators) between sections.
+#   --help            Show this help message.
+#
+# Example:
+#   ./zzlss --no-headings --no-seps
+#   This will list hidden/visible files, directories, and symlinks without headings or separators.
+#
+# Author: Joseph Ian Walker
+# Date: 2021-09-21
+# Version: 1.0
+# License: MIT
+
+# Check if the switches to suppress section headings, separators, or show help are provided
+suppress_headings=false
+suppress_seps=false
+
+# Function to print section headings (unless suppressed)
+print_heading() {
+  if [ "$suppress_headings" = false ]; then
+    echo "$1"  # Prints the section heading
+  fi
+}
+
+# Function to print separators (unless suppressed)
+print_sep() {
+  if [ "$suppress_seps" = false ]; then
+    echo  # Prints a blank line as a separator
+  fi
+}
+
+# Display help function
+show_help() {
+  echo "Usage: zzlss [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  --no-headings     Suppresses the section headings (e.g., 'Hidden Files')."
+  echo "  --no-seps         Suppresses the blank lines (separators) between sections."
+  echo "  --help            Show this help message."
+}
+
+# Parse command-line arguments to check for switches
+for arg in "$@"; do
+  case $arg in
+    --no-headings)
+      suppress_headings=true  # Suppress section headings if --no-headings is passed
+      ;;
+    --no-seps)
+      suppress_seps=true  # Suppress separators if --no-seps is passed
+      ;;
+    --help)
+      show_help
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $arg"
+      show_help
+      exit 1
+      ;;
+  esac
+done
+
+
+
+# List hidden directories and print the results
+print_heading "Hidden Directories:"
+ls -laO | sed '1d' | grep '^d' | grep -E '^\..*|hidden'
+print_sep
+
+# List hidden files and print the results
+print_heading "Hidden Files:"
+ls -laO | sed '1d' | grep -v '^d' | grep -v '^l' | grep -E '^\..*|hidden'
+print_sep
+
+# List visible directories and print the results
+print_heading "Visible Directories:"
+ls -laO | sed '1d' | grep '^d' | grep -vE '^\..*|hidden'
+print_sep
+
+# List visible files and print the results
+print_heading "Visible Files:"
+ls -laO | sed '1d' | grep -v '^d' | grep -v '^l' | grep -vE '^\..*|hidden'
+print_sep
+
+# List symlinks and print the results
+print_heading "Symlinks:"
+ls -laO | sed '1d' | grep '^l'
